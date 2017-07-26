@@ -1,0 +1,135 @@
+<html>
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<style>
+		body{color:#fff;text-shadow: 1px 1px #202020;transition: background 0.5s ease-in;
+			background-size:cover;background-image: url("https://cdn.pixabay.com/photo/2016/01/02/00/42/cloud-1117279_960_720.jpg");}
+		.standardMarg{margin:5px 0px 5px 0px;}
+		.leftPad{padding-left:15px;}
+	
+		#iconArea{padding:0px 0px 0px 5px;}
+		#tempUnit{ text-decoration: none;color:#b3ffff;}
+		#tempUnit:visited{color:#b3ffff;}
+		#tempUnit:hover{color:#3348b7;}
+		#foot {position: absolute;bottom:0px;width:100%;color: #fff;background: rgba(32, 32, 32, 0.7);}
+		/*#loading{color:gray;text-shadow:none;}*/
+		.center{position: absolute;top: 40%;left: 50%;transform: translate(-50%, -50%);text-align: center;vertical-align: center;}
+		.codepenLink{text-decoration: none;}
+
+	</style>
+	<script>
+
+	getWeather = function (data) {
+		var city=data.name;
+		var country=data.sys.country;
+		var temperature=data.main.temp.toFixed(2);
+		var unit="C";
+		var status=data.weather[0].main;
+		setBackground(status);
+		console.log(data);
+		$("#location").text(city + ", "+country);
+		$("#temp").html("<span id='temperature'>"+temperature  +"</span> °<a id='tempUnit' href='#'>C</a>");
+		$("#icon").attr('src',data.weather[0].icon);
+		$("#icon").attr('title',data.weather[0].description);
+		$("#status").text(status);
+		$("#wind").html("Wind: <span id='windSpeed'>"+data.wind.speed+ "</span><span id='speedUnit'> mph</span>");
+		$("#humidity").text("Humidity: "+data.main.humidity+"%");
+		$('#tempUnit').click(function(e){e.preventDefault(); toggleTempUnit(); toggleSpeedUnit(); return false; });
+		toggleTempUnit(); // set default to Farenheight
+	}
+
+	function toggleTempUnit(){
+		var unit=$("#tempUnit").text();
+		var temp=$("#temperature").text();
+		if (unit == "C") {
+			convertedTemp = temp * 9 / 5 + 32;
+			$("#tempUnit").text("F");
+		} else {
+			convertedTemp = (temp -32) * 5 / 9;
+			$("#tempUnit").text("C");
+		}
+		$("#temperature").text(convertedTemp.toFixed(2));
+
+	}
+
+	function toggleSpeedUnit(){
+		var unit=$("#speedUnit").text();
+		var speed=$("#windSpeed").text();
+		if (unit == " mph") {
+			convertedSpeed = speed/0.62;
+			$("#speedUnit").text(" km/h");
+		} else {
+			convertedSpeed = speed*0.62;
+			$("#speedUnit").text(" mph");
+		}
+		$("#windSpeed").text(convertedSpeed.toFixed(1));
+
+	}
+
+	function setBackground(status){
+		//set background based off the status of temperature (Clear, Cloud, partly cloudy, rainy, snowy)
+		var imgs={
+			"Clear":"https://2012iac.files.wordpress.com/2012/09/dscf9585.jpg",
+			"Clouds":"http://static.zerochan.net/Aoha.%28Twintail%29.full.687359.jpg",
+			//"Clouds1":"http://allswalls.com/images/foamy-clouds-in-the-sky-wallpaper-1.jpg",
+			"Rain":"http://www.seattleweatherblog.com/wp-content/uploads/2012/06/RainJune.jpg",
+			"Snow":"https://static.pexels.com/photos/326152/pexels-photo-326152.jpeg",
+			"Default":"https://cdn.pixabay.com/photo/2016/01/02/00/42/cloud-1117279_960_720.jpg"
+		}
+		
+		if(status in imgs){
+			$('body').css('backgroundImage','url('+imgs[status]+')');
+		} else {
+			$('body').css('backgroundImage','url('+imgs["Default"]+')');
+		}
+		
+	}
+
+	$(document).ready(function(){
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(function(position){
+				var lat=position.coords.latitude;
+				var long=position.coords.longitude;
+				console.log("https://fcc-weather-api.glitch.me/api/current?lat="+lat+"&lon="+long);
+				$.getJSON("https://fcc-weather-api.glitch.me/api/current?lat="+lat+"&lon="+long,getWeather);
+				$("#loading").remove();
+			});
+		}
+		navigator.geolocation.watchPosition(function(position) {},
+			function (error) { 
+				if (error.code == error.PERMISSION_DENIED)
+					$("#loading").html("<h3>Could not determine your location</h3>");
+		});
+	});
+	</script>
+</head>
+<body id="body" class="text-center">
+	<div class="container-fluid text-center">
+	<div id="loading" class="center"><h3>Determining your location...</h3> <img id="loadingIcon" src="http://m.gadgets.ndtv.com/static/desktop/images/loading_icon.gif"></div>
+
+		<div id="data">
+			<h1 class=""><div id="location"></div></h1>
+			<h3 class="standardMarg"><div id="status"></div></h3>
+			<div id="iconArea"><img id="icon" src=""></div>
+			<h2 class="standardMarg"><div id="temp"></div></h2>
+			<h4><div id="wind"></div></h4>
+			<h4><div id="humidity"></h4>
+		</div>
+	</div>
+</body>
+<div class="container-fluid" id="foot">
+			<div class="col-xs-12 text-center">
+				<h4>Created by <a class="codepenLink" href="https://codepen.io/ttse/">Tim@ttse</a></h4>
+			</div>
+			<div class="social-media-icons col-xs-12">
+				<ul class="list-inline col-xs-12">
+					<a href="https://www.facebook.com/tim.tse.501"><i class="fa fa-facebook-square fa-2x"></i></a>
+					<a href="https://github.com/timttse"><i class="fa fa-github-square fa-2x"></i></a>
+					<a href="https://www.linkedin.com/in/tim-tse/"><i class="fa fa fa-linkedin-square fa-2x"></i></a>
+				</ul>
+			</div>
+		</div>
+</html>
