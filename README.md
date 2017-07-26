@@ -1,4 +1,4 @@
-#Local Weather App
+# Local Weather App
 
 Free code camp project: https://www.freecodecamp.org/challenges/show-the-local-weather
 
